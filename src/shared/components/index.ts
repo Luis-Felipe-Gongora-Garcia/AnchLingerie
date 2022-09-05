@@ -1,1 +1,1 @@
-export {} from '';
+export * from './side-menu/SideMenu';
