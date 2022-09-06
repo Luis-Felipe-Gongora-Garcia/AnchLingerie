@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import { LightTheme } from '../themes';
 import { ThemeProvider, Box } from '@mui/system';
 
