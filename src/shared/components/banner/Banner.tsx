@@ -16,7 +16,7 @@ export const Banner: React.FC<IBannerProps> = ({ children }) => {
       alignItems='center'
       component={Paper}
     >
-      <Typography variant='h1'>Banner</Typography>
+      Teste
     </Box>
   );
 };
