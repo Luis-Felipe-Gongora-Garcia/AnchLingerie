@@ -1,22 +1,27 @@
-import { Paper, Typography, useTheme } from '@mui/material';
-import { Box } from '@mui/system';
+import { Box, Paper, Typography } from '@mui/material';
+import { useTheme } from '@mui/system';
 
 interface IBannerProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const Banner: React.FC<IBannerProps> = ({ children }) => {
   const theme = useTheme();
   return (
-    <Box
-      width='100%'
-      height={theme.spacing(20)}
-      display='flex'
-      justifyContent='center'
-      alignItems='center'
-      component={Paper}
-    >
-      Teste
-    </Box>
+    <>
+      <Box
+        display='flex'
+        alignItems='center'
+        justifyContent='center'
+        height={theme.spacing(20)}
+        component={Paper}
+        marginRight={1}
+      >
+        Teste
+      </Box>
+      <Box flex={1} overflow='auto'>
+        {children}
+      </Box>
+    </>
   );
 };

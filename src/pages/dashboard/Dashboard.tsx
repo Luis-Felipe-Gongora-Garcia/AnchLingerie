@@ -1,5 +1,10 @@
+import { Toolbar } from '../../shared/components';
 import { LayoutBasePage } from '../../shared/layouts';
 
 export const Dashboard = () => {
-  return <LayoutBasePage title='Página Inicial'>Testando</LayoutBasePage>;
+  return (
+    <LayoutBasePage toolbar={<Toolbar />} title='Página Inicial'>
+      Testando
+    </LayoutBasePage>
+  );
 };
