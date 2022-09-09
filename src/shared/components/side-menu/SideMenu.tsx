@@ -15,13 +15,16 @@ import {
   useTheme,
 } from '@mui/material';
 
+import IconBabyDoll from '../../../assets/images/babydoll.png';
+
 interface ISideMenuProps {
   children?: React.ReactNode;
 }
 
 interface IListItemLinkProps {
   to: string;
-  icon: string;
+  icon?: string;
+  html?: string;
   label: string;
   onClick: (() => void) | undefined;
 }
@@ -29,6 +32,7 @@ interface IListItemLinkProps {
 const ListItemLink: React.FC<IListItemLinkProps> = ({
   to,
   icon,
+  html,
   label,
   onClick,
 }) => {
@@ -44,17 +48,9 @@ const ListItemLink: React.FC<IListItemLinkProps> = ({
   };
 
   return (
-    <ListItemButton
-      // sx={{
-      //   '& .Mui-selected': {
-      //     color: 'purple',
-      //   },
-      // }}
-      selected={!!match}
-      onClick={handleCLick}
-    >
+    <ListItemButton selected={!!match} onClick={handleCLick}>
       <ListItemIcon>
-        <Icon>{icon}</Icon>
+        {icon ? <Icon>{icon}</Icon> : <img src={html} />}
       </ListItemIcon>
       <ListItemText primary={label} />
     </ListItemButton>
@@ -107,6 +103,7 @@ export const SideMenu: React.FC<ISideMenuProps> = ({ children }) => {
                   icon={drawerOptions.icon}
                   key={drawerOptions.path}
                   label={drawerOptions.label}
+                  html={drawerOptions.html}
                   onClick={smDown ? toggleDrawerOpen : undefined}
                 />
               ))}

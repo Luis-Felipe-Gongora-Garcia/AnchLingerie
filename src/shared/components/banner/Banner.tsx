@@ -1,5 +1,6 @@
 import { Box, Paper, Typography } from '@mui/material';
 import { useTheme } from '@mui/system';
+import MyBanner from '../../../assets/images/banner.png';
 
 interface IBannerProps {
   children: React.ReactNode;
@@ -17,7 +18,7 @@ export const Banner: React.FC<IBannerProps> = ({ children }) => {
         component={Paper}
         marginRight={1}
       >
-        Teste
+        <img width='100%' height='100%' src={MyBanner} alt='banner' />
       </Box>
       <Box flex={1} overflow='auto'>
         {children}

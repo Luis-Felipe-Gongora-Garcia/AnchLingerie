@@ -1,6 +1,8 @@
 import {
   Box,
   Button,
+  Icon,
+  InputAdornment,
   Menu,
   MenuItem,
   Paper,
@@ -37,14 +39,25 @@ export const Toolbar: React.FC = () => {
       flexDirection='row'
       height={theme.spacing(5)}
     >
-      <TextField size='small' />
-      <Box>
+      <TextField
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <Icon>search</Icon>
+            </InputAdornment>
+          ),
+        }}
+        placeholder='Pesquisar...'
+        size='small'
+      />
+      <Box flex={1} display='flex' justifyContent='end'>
         <Button
           variant='contained'
           aria-haspopup='true'
           onClick={handleClick}
           aria-expanded={openMenu ? 'true' : undefined}
           aria-controls={openMenu ? 'basic-menu' : undefined}
+          endIcon={<Icon>arrow_drop_down</Icon>}
         >
           <Typography>Filtro</Typography>
         </Button>

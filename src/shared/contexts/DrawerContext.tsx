@@ -12,9 +12,10 @@ interface IAppDrawerContextProps {
 }
 
 interface IDrawerOptions {
-  icon: string;
+  icon?: string;
   path: string;
   label: string;
+  html?: string;
 }
 
 const DrawerContext = createContext({} as IDrawerContextData);
