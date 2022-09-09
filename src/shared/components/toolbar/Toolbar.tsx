@@ -12,15 +12,48 @@ import {
 } from '@mui/material';
 import { MouseEvent, useState } from 'react';
 
-export const Toolbar: React.FC = () => {
+interface IToolbarProps {
+  searchText?: string;
+  changeTextSearch?: (newText: string) => void;
+  showSearchText?: boolean;
+  showFilter?: boolean;
+  onClickFilter?: () => void;
+}
+
+const options = [
+  'Filtro',
+  'Tamanho P',
+  'Tamanho M',
+  'Tamanho G',
+  'Tamanho GG',
+  'Tamanho Plus Size',
+  'Do maior R$ pro menor R$',
+  'Do menor R$ pro maior R$',
+];
+
+export const Toolbar: React.FC<IToolbarProps> = ({
+  searchText = '',
+  changeTextSearch,
+  showSearchText = false,
+  showFilter = false,
+  onClickFilter,
+}) => {
   const theme = useTheme();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  const [selectedIndex, setSelectedIndex] = useState(1);
+
   const openMenu = Boolean(anchorEl);
 
-  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
+  const handleMenuClick = (e: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
+  };
+
+  const handleMenuItemClick = (_: MouseEvent<HTMLElement>, index: number) => {
+    setSelectedIndex(index);
+    setAnchorEl(null);
+    onClickFilter?.();
   };
 
   const handleClose = () => {
@@ -39,35 +72,49 @@ export const Toolbar: React.FC = () => {
       flexDirection='row'
       height={theme.spacing(5)}
     >
-      <TextField
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start'>
-              <Icon>search</Icon>
-            </InputAdornment>
-          ),
-        }}
-        placeholder='Pesquisar...'
-        size='small'
-      />
+      {showSearchText && (
+        <TextField
+          value={searchText}
+          onChange={(e) => changeTextSearch?.(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <Icon>search</Icon>
+              </InputAdornment>
+            ),
+          }}
+          placeholder='Pesquisar...'
+          size='small'
+        />
+      )}
       <Box flex={1} display='flex' justifyContent='end'>
-        <Button
-          variant='contained'
-          aria-haspopup='true'
-          onClick={handleClick}
-          aria-expanded={openMenu ? 'true' : undefined}
-          aria-controls={openMenu ? 'basic-menu' : undefined}
-          endIcon={<Icon>arrow_drop_down</Icon>}
+        {showFilter && (
+          <Button
+            variant='contained'
+            aria-haspopup='true'
+            onClick={handleMenuClick}
+            aria-expanded={openMenu ? 'true' : undefined}
+            aria-controls={openMenu ? 'basic-menu' : undefined}
+            endIcon={<Icon>arrow_drop_down</Icon>}
+          >
+            {<Typography>{options[selectedIndex]}</Typography>}
+          </Button>
+        )}
+        <Menu
+          anchorEl={anchorEl}
+          open={openMenu}
+          onClose={handleClose}
+          MenuListProps={{ 'aria-labelledby': 'lock-button', role: 'listbox' }}
         >
-          <Typography>Filtro</Typography>
-        </Button>
-        <Menu anchorEl={anchorEl} open={openMenu} onClose={handleClose}>
-          <MenuItem onClick={handleClose}>Tamanho P</MenuItem>
-          <MenuItem onClick={handleClose}>Tamanho M</MenuItem>
-          <MenuItem onClick={handleClose}>Tamanho G</MenuItem>
-          <MenuItem onClick={handleClose}>Tamanho GG</MenuItem>
-          <MenuItem onClick={handleClose}>Do maior R$ pro menor R$</MenuItem>
-          <MenuItem onClick={handleClose}>Do menor R$ pro maior R$</MenuItem>
+          {options.map((option, index) => (
+            <MenuItem
+              key={option}
+              selected={index === selectedIndex}
+              onClick={(e) => handleMenuItemClick(e, index)}
+            >
+              {option}
+            </MenuItem>
+          ))}
         </Menu>
       </Box>
     </Box>
