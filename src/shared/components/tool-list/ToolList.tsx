@@ -72,21 +72,23 @@ export const ToolList: React.FC<IToolList> = ({
       flexDirection='row'
       height={theme.spacing(5)}
     >
-      {showSearchText && (
-        <TextField
-          value={searchText}
-          onChange={(e) => changeTextSearch?.(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <Icon>search</Icon>
-              </InputAdornment>
-            ),
-          }}
-          placeholder='Pesquisar...'
-          size='small'
-        />
-      )}
+      <Box display='flex' justifyContent='start'>
+        {showSearchText && (
+          <TextField
+            value={searchText}
+            onChange={(e) => changeTextSearch?.(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Icon>search</Icon>
+                </InputAdornment>
+              ),
+            }}
+            placeholder='Pesquisar...'
+            size='small'
+          />
+        )}
+      </Box>
       <Box flex={1} display='flex' justifyContent='end'>
         {showFilter && (
           <Button
@@ -97,7 +99,16 @@ export const ToolList: React.FC<IToolList> = ({
             aria-controls={openMenu ? 'basic-menu' : undefined}
             endIcon={<Icon>arrow_drop_down</Icon>}
           >
-            {<Typography>{options[selectedIndex]}</Typography>}
+            {
+              <Typography
+                variant='button'
+                overflow='hidden'
+                whiteSpace='nowrap'
+                textOverflow='ellipsis'
+              >
+                {options[selectedIndex]}
+              </Typography>
+            }
           </Button>
         )}
         <Menu
