@@ -42,7 +42,7 @@ export const ToolList: React.FC<IToolList> = ({
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  const [selectedIndex, setSelectedIndex] = useState(1);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const openMenu = Boolean(anchorEl);
 

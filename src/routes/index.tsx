@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { useDrawerContext } from '../shared/contexts';
-import { Dashboard } from '../pages';
+import { BabyDoll, InitialPage, Sets, Sweaters } from '../pages';
 
 export const AppRoutes = () => {
   const { setDrawerOptions } = useDrawerContext();
@@ -54,7 +54,7 @@ export const AppRoutes = () => {
 
   return (
     <Routes>
-      <Route path='/pagina-inicial' element={<Dashboard />} />
+      <Route path='/pagina-inicial' element={<InitialPage />} />
       <Route path='*' element={<Navigate to='/pagina-inicial' />} />
       <Route
         path='/localizacao'
@@ -64,19 +64,9 @@ export const AppRoutes = () => {
         path='/politicas'
         element={<Button variant='contained'>politicas</Button>}
       />
-      <Route
-        path='/babydoll'
-        element={<Button variant='contained'>babydoll</Button>}
-      />
-            <Route
-        path='/conjuntos'
-        element={<Button variant='contained'>conjuntos</Button>}
-      />
-            <Route
-        path='/camisolas'
-        element={<Button variant='contained'>camisolas</Button>}
-      />
-      
+      <Route path='/babydoll' element={<BabyDoll />} />
+      <Route path='/conjuntos' element={<Sets />} />
+      <Route path='/camisolas' element={<Sweaters />} />
     </Routes>
   );
 };

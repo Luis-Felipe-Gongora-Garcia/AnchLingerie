@@ -1,11 +1,11 @@
 import { ToolList } from '../../shared/components';
 import { LayoutBasePage } from '../../shared/layouts';
 
-export const Dashboard = () => {
+export const Sets = () => {
   return (
     <LayoutBasePage
-      toolbar={<ToolList showSearchText showFilter />}
-      title='Página Inicial'
+      title='Conjuntos'
+      toolbar={<ToolList showFilter showSearchText />}
     >
       Testando
     </LayoutBasePage>
