@@ -1,3 +1,3 @@
 export * from './side-menu/SideMenu';
-export * from './toolbar/Toolbar';
+export * from './tool-list/ToolList';
 export * from './banner/Banner';

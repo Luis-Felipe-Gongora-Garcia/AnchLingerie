@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { MouseEvent, useState } from 'react';
 
-interface IToolbarProps {
+interface IToolList {
   searchText?: string;
   changeTextSearch?: (newText: string) => void;
   showSearchText?: boolean;
@@ -31,7 +31,7 @@ const options = [
   'Do menor R$ pro maior R$',
 ];
 
-export const Toolbar: React.FC<IToolbarProps> = ({
+export const ToolList: React.FC<IToolList> = ({
   searchText = '',
   changeTextSearch,
   showSearchText = false,
