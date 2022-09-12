@@ -12,8 +12,10 @@ import {
 } from '@mui/material';
 import { MouseEvent, useState } from 'react';
 
+import { Environment } from '../../environment';
+
 interface IToolList {
-  searchText?: string;
+  searchText?: string | null;
   changeTextSearch?: (newText: string) => void;
   showSearchText?: boolean;
   showFilter?: boolean;
@@ -84,7 +86,7 @@ export const ToolList: React.FC<IToolList> = ({
                 </InputAdornment>
               ),
             }}
-            placeholder='Pesquisar...'
+            placeholder={Environment.INPUT_DE_BUSCA}
             size='small'
           />
         )}

@@ -1,13 +1,11 @@
 import { ToolList } from '../../shared/components';
 import { LayoutBasePage } from '../../shared/layouts';
 
-export const Sweaters = () => {
+export const Sweaters: React.FC = () => {
   return (
     <LayoutBasePage
       title='Camisolas'
-      toolbar={<ToolList showFilter showSearchText />}
-    >
-      Testando
-    </LayoutBasePage>
+      toolbar={<ToolList showFilter showSearchText searchText='teste' />}
+    ></LayoutBasePage>
   );
 };
