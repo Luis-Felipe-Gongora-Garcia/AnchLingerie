@@ -3,10 +3,10 @@
     {
       "id": 1,
       "nome": "Conjunto tal",
-      "foto": "../src/assets/banner.png",
       "descricao": "Esse conjunto eh tal tal taltataltaltaltal",
       "descricaoAbrev": "Esse conjunto eh tal tal taltataltaltaltal",
-      "tamanhos": "P M e G"
+      "tamanhos": "P M e G",
+      "preco": "R$: 69,90"
     }
   ]
 }
