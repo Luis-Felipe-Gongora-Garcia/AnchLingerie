@@ -11,21 +11,25 @@ import { LayoutBasePage } from '../../shared/layouts';
 import { useSearchParams } from 'react-router-dom';
 import { Box } from '@mui/system';
 import { ConjuntosService } from '../../shared/services/api/conjuntos/ConjuntosService';
+import { UseDebounce } from '../../shared/hooks';
 
 export const Sets: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { debounce } = UseDebounce(1000);
 
   const search = useMemo(() => {
     return searchParams.get('busca') || '';
   }, [searchParams]);
 
   useEffect(() => {
-    ConjuntosService.getAll(1, search).then((result) => {
-      if (result instanceof Error) {
-        alert(result.message);
-        return;
-      }
-      console.log(result);
+    debounce(() => {
+      ConjuntosService.getAll(1, search).then((result) => {
+        if (result instanceof Error) {
+          alert(result.message);
+          return;
+        }
+        console.log(result);
+      });
     });
   }, [search]);
 
@@ -44,7 +48,6 @@ export const Sets: React.FC = () => {
       }
     >
       <Box
-        flex={1}
         display='flex'
         flexDirection='row'
         flexWrap='wrap'
