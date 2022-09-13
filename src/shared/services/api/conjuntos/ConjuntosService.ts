@@ -20,14 +20,23 @@ export interface IDetailSets {
 
 type TListSets = {
   data: IListSets[];
+  totalCount: number;
 };
 
-const getAll = async (page = 1, filter = ''): Promise<TListSets | Error> => {
+const getAll = async (
+  page = 1,
+  filterName = ''
+): Promise<TListSets | Error> => {
   try {
-    const urlRelativa = `/conjuntos?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filter}`;
-    const { data } = await Api.get(urlRelativa);
+    const urlRelativa = `/conjuntos?_page=${page}&_limit=${Environment.LIMITE_DE_LINHAS}&nome_like=${filterName}`;
+    const { data, headers } = await Api.get(urlRelativa);
     if (data) {
-      return { data };
+      return {
+        data,
+        totalCount: Number(
+          headers['x-total-count'] || Environment.LIMITE_DE_LINHAS
+        ),
+      };
     }
     return new Error('Erro ao listar as peças.');
   } catch (error) {

@@ -19,7 +19,7 @@ interface IToolList {
   changeTextSearch?: (newText: string) => void;
   showSearchText?: boolean;
   showFilter?: boolean;
-  onClickFilter?: () => void;
+  onClickFilter?: (newSize: string) => void;
 }
 
 const options = [
@@ -55,7 +55,6 @@ export const ToolList: React.FC<IToolList> = ({
   const handleMenuItemClick = (_: MouseEvent<HTMLElement>, index: number) => {
     setSelectedIndex(index);
     setAnchorEl(null);
-    onClickFilter?.();
   };
 
   const handleClose = () => {
@@ -96,7 +95,7 @@ export const ToolList: React.FC<IToolList> = ({
           <Button
             variant='contained'
             aria-haspopup='true'
-            onClick={handleMenuClick}
+            onClick={(e) => handleMenuClick(e)}
             aria-expanded={openMenu ? 'true' : undefined}
             aria-controls={openMenu ? 'basic-menu' : undefined}
             endIcon={<Icon>arrow_drop_down</Icon>}

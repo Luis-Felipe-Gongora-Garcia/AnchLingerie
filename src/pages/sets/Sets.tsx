@@ -7,6 +7,8 @@ import {
   CardMedia,
   Typography,
   Paper,
+  CircularProgress,
+  Pagination,
 } from '@mui/material';
 import { LayoutBasePage } from '../../shared/layouts';
 import { useSearchParams } from 'react-router-dom';
@@ -16,22 +18,34 @@ import {
   IListSets,
 } from '../../shared/services/api/conjuntos/ConjuntosService';
 import { UseDebounce } from '../../shared/hooks';
+import { Environment } from '../../shared/environment';
+import SophiaB from '../../assets/images/conjuntoSophiaBranco.jpg';
+import SophiaP from '../../assets/images/conjuntoSophiaPreto.jpg';
+import ClaraV from '../../assets/images/conjuntoClaraVerdeA.jpg';
+import ClaraB from '../../assets/images/conjuntoClaraBranca.jpg';
 
 export const Sets: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { debounce } = UseDebounce(1000);
 
   const [cards, setCards] = useState<IListSets[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  const search = useMemo(() => {
+  const filterName = useMemo(() => {
     return searchParams.get('busca') || '';
   }, [searchParams]);
+
+  const page = useMemo(() => {
+    return Number(searchParams.get('pagina') || '1');
+  }, [searchParams]);
+
+  const imgs = [SophiaB, SophiaP, ClaraV, ClaraB];
 
   useEffect(() => {
     setIsLoading(true);
     debounce(() => {
-      ConjuntosService.getAll(1, search).then((result) => {
+      ConjuntosService.getAll(page, filterName).then((result) => {
         setIsLoading(false);
         if (result instanceof Error) {
           alert(result.message);
@@ -39,79 +53,124 @@ export const Sets: React.FC = () => {
         }
         console.log(result);
         setCards(result.data);
+        setTotalCount(result.totalCount);
       });
     });
-  }, [search]);
+  }, [filterName, page, debounce]);
 
   return (
     <LayoutBasePage
       title='Camisolas'
       toolbar={
         <ToolList
-          showFilter
           showSearchText
-          searchText={search}
+          searchText={filterName}
           changeTextSearch={(texto) =>
-            setSearchParams({ busca: texto }, { replace: true })
+            setSearchParams({ busca: texto, pagina: '1' }, { replace: true })
           }
         />
       }
     >
       <Box
         display='flex'
-        flexDirection='row'
-        flexWrap='wrap'
+        width='auto'
+        height='auto'
+        flexDirection='column'
+        flex={1}
         justifyContent='center'
+        alignItems='center'
         margin={1}
-        // marginX={4}
-        gap={2}
         component={Paper}
       >
-        {cards.map((card) => (
-          <Card
-            key={card.nome}
-            sx={{
-              maxWidth: 400,
-              maxHeight: 400,
-              width: 400,
-              height: 400,
-              marginX: 4,
-            }}
-          >
-            <CardActionArea
-              sx={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <CardMedia
-                component='img'
-                height='250'
-                image={require('../../assets/images/conjuntotal.png')}
-              />
-              <CardContent
+        <Box
+          display='flex'
+          flexDirection='row'
+          flexWrap='wrap'
+          justifyContent='center'
+          overflow='auto'
+        >
+          {totalCount === 0 && !isLoading && (
+            <caption>
+              <Typography variant='h4'>{Environment.LISTAGEM_VAZIA}</Typography>
+            </caption>
+          )}
+          {isLoading ? (
+            <Box overflow='hidden'>
+              <CircularProgress variant='indeterminate' size={200} />
+            </Box>
+          ) : (
+            cards.map((card) => (
+              <Card
+                key={card.id}
                 sx={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  maxWidth: 400,
+                  maxHeight: 650,
+                  width: 'auto',
+                  height: 'auto',
+                  marginX: 4,
+                  margin: 1,
                 }}
               >
-                <Typography gutterBottom variant='h5' component='div'>
-                  {card.nome}
-                </Typography>
-                <Typography gutterBottom variant='body2' color='text.secondary'>
-                  {card.descricaoAbrev}
-                </Typography>
-                <Typography variant='h6'>{card.preco}</Typography>
-              </CardContent>
-            </CardActionArea>
-          </Card>
-        ))}
+                <CardActionArea
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <Box>
+                    <CardMedia
+                      component='img'
+                      width='auto'
+                      height='250'
+                      image={imgs[card.id]}
+                    />
+                  </Box>
+                  <CardContent
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Typography gutterBottom variant='h5' component='div'>
+                      {card.nome}
+                    </Typography>
+                    <Typography
+                      gutterBottom
+                      variant='body2'
+                      color='text.secondary'
+                    >
+                      {card.descricaoAbrev}
+                    </Typography>
+                    <Typography variant='h6'>{card.preco}</Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      {card.tamanhos}
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+            ))
+          )}
+        </Box>
+        {totalCount > 0 &&
+          totalCount > Environment.LIMITE_DE_LINHAS &&
+          !isLoading && (
+            <Pagination
+              page={page}
+              count={Math.ceil(totalCount / Environment.LIMITE_DE_LINHAS)}
+              onChange={(_, newPage) =>
+                setSearchParams(
+                  { busca: filterName, pagina: newPage.toString() },
+                  { replace: true }
+                )
+              }
+            />
+          )}
       </Box>
     </LayoutBasePage>
   );
