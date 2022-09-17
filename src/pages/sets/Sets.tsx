@@ -11,7 +11,7 @@ import {
   Pagination,
 } from '@mui/material';
 import { LayoutBasePage } from '../../shared/layouts';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Box } from '@mui/system';
 import {
   ConjuntosService,
@@ -25,6 +25,7 @@ import ClaraV from '../../assets/images/conjuntoClaraVerdeA.jpg';
 import ClaraB from '../../assets/images/conjuntoClaraBranca.jpg';
 
 export const Sets: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { debounce } = UseDebounce(1000);
 
@@ -112,6 +113,7 @@ export const Sets: React.FC = () => {
                 }}
               >
                 <CardActionArea
+                  onClick={() => navigate(`/conjuntos/detalhe/${card.id}`)}
                   sx={{
                     width: '100%',
                     height: '100%',

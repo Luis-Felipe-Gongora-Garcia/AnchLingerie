@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { useDrawerContext } from '../shared/contexts';
-import { BabyDoll, InitialPage, Sets, Sweaters } from '../pages';
+import { BabyDoll, InitialPage, Sets, SetsDetails, Sweaters } from '../pages';
 
 export const AppRoutes = () => {
   const { setDrawerOptions } = useDrawerContext();
@@ -66,6 +66,7 @@ export const AppRoutes = () => {
       />
       <Route path='/babydoll' element={<BabyDoll />} />
       <Route path='/conjuntos' element={<Sets />} />
+      <Route path='/conjuntos/detalhe/:id' element={<SetsDetails />} />
       <Route path='/camisolas' element={<Sweaters />} />
     </Routes>
   );
