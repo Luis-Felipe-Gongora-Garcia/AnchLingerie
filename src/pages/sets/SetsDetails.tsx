@@ -49,9 +49,9 @@ export const SetsDetails: React.FC = () => {
         component={Paper}
       >
         <Grid container spacing={2}>
-          <Grid item>
+          <Grid item xs={6}>
             <Box m={3} component='div'>
-              <img height='700' src={SophiaB} />
+              <img height='100%' src={SophiaB} />
             </Box>
           </Grid>
           <Grid
@@ -60,7 +60,7 @@ export const SetsDetails: React.FC = () => {
             alignItems='center'
             flex={1}
             item
-            xs={4}
+            xs={6}
           >
             <Box
               m={3}

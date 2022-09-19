@@ -1,5 +1,7 @@
+import { Box } from '@mui/system';
 import { useMemo, useEffect, useState } from 'react';
-import { ToolList } from '../../shared/components';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+
 import {
   Card,
   CardActionArea,
@@ -10,19 +12,16 @@ import {
   CircularProgress,
   Pagination,
 } from '@mui/material';
+import { UseDebounce } from '../../shared/hooks';
+import { ToolList } from '../../shared/components';
 import { LayoutBasePage } from '../../shared/layouts';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Box } from '@mui/system';
+import { Environment } from '../../shared/environment';
 import {
   ConjuntosService,
   IListSets,
 } from '../../shared/services/api/conjuntos/ConjuntosService';
-import { UseDebounce } from '../../shared/hooks';
-import { Environment } from '../../shared/environment';
-import SophiaB from '../../assets/images/conjuntoSophiaBranco.jpg';
-import SophiaP from '../../assets/images/conjuntoSophiaPreto.jpg';
-import ClaraV from '../../assets/images/conjuntoClaraVerdeA.jpg';
-import ClaraB from '../../assets/images/conjuntoClaraBranca.jpg';
+import { getDownloadURL, listAll, ref } from 'firebase/storage';
+import { storage } from '../../shared/services/api/firebase/Firebase';
 
 export const Sets: React.FC = () => {
   const navigate = useNavigate();
@@ -41,9 +40,25 @@ export const Sets: React.FC = () => {
     return Number(searchParams.get('pagina') || '1');
   }, [searchParams]);
 
-  const imgs = [SophiaB, SophiaP, ClaraV, ClaraB];
+  const [imgs, setImgs] = useState<string[]>([]);
+  const listImgs = ref(storage, 'Conjuntos');
 
   useEffect(() => {
+    listAll(listImgs)
+      .then((res) => {
+        console.log(res);
+        res.items.forEach((item) => {
+          getDownloadURL(item).then((url) => {
+            console.log(url);
+            setImgs((prev) => [...prev, url]);
+          });
+          console.log(imgs);
+        });
+      })
+      .catch((error) => {
+        alert(error.message);
+        console.log(error);
+      });
     setIsLoading(true);
     debounce(() => {
       ConjuntosService.getAll(page, filterName).then((result) => {
