@@ -15,14 +15,17 @@ import {
 import { ToolList } from '../../shared/components';
 import { LayoutBasePage } from '../../shared/layouts';
 import { Environment } from '../../shared/environment';
+
 import { db } from '../../shared/services/api/firebase/Firebase';
 import {
   collection,
   DocumentData,
   getDocs,
   limit,
+  orderBy,
   query,
   startAfter,
+  where,
 } from 'firebase/firestore';
 
 export const Sets: React.FC = () => {
@@ -40,6 +43,7 @@ export const Sets: React.FC = () => {
   }, [searchParams]);
 
   const [docsSets, setDocsSets] = useState<DocumentData[]>([]);
+  const [allDocsSets, setAllDocsSets] = useState<DocumentData[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -54,17 +58,39 @@ export const Sets: React.FC = () => {
       const next = query(
         collection(db, 'conjuntos'),
         startAfter(lastVisible),
-        limit(8)
+        limit(Environment.LIMITE_DE_LINHAS)
       );
       const sets = documentSnapshots.docs.map((doc) => ({
         ...doc.data(),
         id: doc.id,
       }));
-      setDocsSets(sets);
-      setIsLoading(false);
+      const test = documentSnapshots.docs.map((doc) => ({
+        ...doc.data(),
+      }));
+      if (filterName.length != 0) {
+        const filter = test.filter((doc) => {
+          return doc.nome.includes(filterName);
+        });
+        setDocsSets([...filter]);
+        console.log('aqui', docsSets);
+        setIsLoading(false);
+      } else {
+        setDocsSets(sets);
+        setIsLoading(false);
+      }
     };
+    const allCollection = async () => {
+      const allDocs = query(collection(db, 'Conjuntos'));
+      const documentSnapshots = await getDocs(allDocs);
+      const allSets = documentSnapshots.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setAllDocsSets(allSets);
+    };
+    allCollection();
     paginate();
-  }, []);
+  }, [filterName, page]);
 
   return (
     <LayoutBasePage
@@ -96,6 +122,8 @@ export const Sets: React.FC = () => {
           flexWrap='wrap'
           justifyContent='center'
           overflow='auto'
+          width='100%'
+          height='100%'
         >
           {docsSets.length === 0 && !isLoading && (
             <caption>
@@ -113,8 +141,8 @@ export const Sets: React.FC = () => {
                 sx={{
                   maxWidth: 400,
                   maxHeight: 650,
-                  width: 'auto',
-                  height: 'auto',
+                  width: '100%',
+                  height: '100%',
                   marginX: 4,
                   margin: 1,
                 }}
@@ -166,12 +194,14 @@ export const Sets: React.FC = () => {
             ))
           )}
         </Box>
-        {docsSets.length > 0 &&
-          docsSets.length > Environment.LIMITE_DE_LINHAS &&
+        {allDocsSets.length > 0 &&
+          allDocsSets.length > Environment.LIMITE_DE_LINHAS &&
           !isLoading && (
             <Pagination
               page={page}
-              count={Math.ceil(docsSets.length / Environment.LIMITE_DE_LINHAS)}
+              count={Math.ceil(
+                allDocsSets.length / Environment.LIMITE_DE_LINHAS
+              )}
               onChange={(_, newPage) =>
                 setSearchParams(
                   { busca: filterName, pagina: newPage.toString() },
