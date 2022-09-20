@@ -2,12 +2,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ToolDetail } from '../../shared/components';
 import { LayoutBasePage } from '../../shared/layouts';
-import {
-  ConjuntosService,
-  IDetailSets,
-} from '../../shared/services/api/conjuntos/ConjuntosService';
-import { Box, Grid, Paper, Typography } from '@mui/material';
-import SophiaB from '../../assets/images/conjuntoSophiaBranco.jpg';
+import { Box, CircularProgress, Grid, Paper, Typography } from '@mui/material';
+import { doc, DocumentData, getDoc } from 'firebase/firestore';
+import { db } from '../../shared/services/api/firebase/Firebase';
 
 export const SetsDetails: React.FC = () => {
   const { id = '' } = useParams<'id'>();
@@ -16,26 +13,23 @@ export const SetsDetails: React.FC = () => {
   const [descricao, setDescricao] = useState('');
   const [name, setName] = useState('');
   const [tamanhos, setTamanhos] = useState('');
+  const [docsSets, setDocsSets] = useState<DocumentData>();
 
   useEffect(() => {
     setIsLoading(true);
-    ConjuntosService.getById(Number(id)).then((result) => {
+    const paginate = async () => {
+      const docRef = doc(db, 'Conjuntos', id);
+      const docSnap = await getDoc(docRef);
+      const sets = docSnap.data();
+      setDocsSets(sets);
       setIsLoading(false);
-      if (result instanceof Error) {
-        alert(result.message);
-        navigate('/pessoas');
-        return;
-      }
-      console.log(result);
-      setName(result.nome);
-      setDescricao(result.descricao);
-      setTamanhos(result.tamanhos);
-    });
-  }, [id]);
+    };
+    paginate();
+  }, []);
 
   return (
     <LayoutBasePage
-      title={name}
+      title={docsSets?.nome}
       toolbar={<ToolDetail onClickBack={() => navigate('/conjuntos')} />}
     >
       <Box
@@ -51,7 +45,7 @@ export const SetsDetails: React.FC = () => {
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <Box m={3} component='div'>
-              <img height='100%' src={SophiaB} />
+              <img height='100%' src={docsSets?.img} />
             </Box>
           </Grid>
           <Grid
@@ -71,15 +65,32 @@ export const SetsDetails: React.FC = () => {
               alignItems='center'
               flex={1}
             >
-              <Typography gutterBottom variant='h2'>
-                {name}
-              </Typography>
-              <Typography gutterBottom variant='body1'>
-                {descricao}
-              </Typography>
-              <Typography gutterBottom variant='body2'>
-                Tamanhos disponiveis: {tamanhos}
-              </Typography>
+              {isLoading ? (
+                <Box overflow='hidden'>
+                  <CircularProgress variant='indeterminate' size={200} />
+                </Box>
+              ) : (
+                <Box
+                  component='div'
+                  display='flex'
+                  flexDirection='column'
+                  justifyContent='center'
+                  alignItems='center'
+                >
+                  <Typography gutterBottom variant='h2'>
+                    {docsSets?.nome}
+                  </Typography>
+                  <Typography gutterBottom variant='body1'>
+                    {docsSets?.descricao}
+                  </Typography>
+                  <Typography gutterBottom variant='body2'>
+                    Valor: {docsSets?.preco}
+                  </Typography>
+                  <Typography gutterBottom variant='body1'>
+                    Tamanhos disponiveis: {docsSets?.tamanhos}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Grid>
         </Grid>

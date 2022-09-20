@@ -12,24 +12,23 @@ import {
   CircularProgress,
   Pagination,
 } from '@mui/material';
-import { UseDebounce } from '../../shared/hooks';
 import { ToolList } from '../../shared/components';
 import { LayoutBasePage } from '../../shared/layouts';
 import { Environment } from '../../shared/environment';
+import { db } from '../../shared/services/api/firebase/Firebase';
 import {
-  ConjuntosService,
-  IListSets,
-} from '../../shared/services/api/conjuntos/ConjuntosService';
-import { getDownloadURL, listAll, ref } from 'firebase/storage';
-import { storage } from '../../shared/services/api/firebase/Firebase';
+  collection,
+  DocumentData,
+  getDocs,
+  limit,
+  query,
+  startAfter,
+} from 'firebase/firestore';
 
 export const Sets: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { debounce } = UseDebounce(1000);
 
-  const [cards, setCards] = useState<IListSets[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   const filterName = useMemo(() => {
@@ -40,43 +39,36 @@ export const Sets: React.FC = () => {
     return Number(searchParams.get('pagina') || '1');
   }, [searchParams]);
 
-  const [imgs, setImgs] = useState<string[]>([]);
-  const listImgs = ref(storage, 'Conjuntos');
+  const [docsSets, setDocsSets] = useState<DocumentData[]>([]);
 
   useEffect(() => {
-    listAll(listImgs)
-      .then((res) => {
-        console.log(res);
-        res.items.forEach((item) => {
-          getDownloadURL(item).then((url) => {
-            console.log(url);
-            setImgs((prev) => [...prev, url]);
-          });
-          console.log(imgs);
-        });
-      })
-      .catch((error) => {
-        alert(error.message);
-        console.log(error);
-      });
     setIsLoading(true);
-    debounce(() => {
-      ConjuntosService.getAll(page, filterName).then((result) => {
-        setIsLoading(false);
-        if (result instanceof Error) {
-          alert(result.message);
-          return;
-        }
-        console.log(result);
-        setCards(result.data);
-        setTotalCount(result.totalCount);
-      });
-    });
-  }, [filterName, page, debounce]);
+    const paginate = async () => {
+      const firstPage = query(
+        collection(db, 'Conjuntos'),
+        limit(Environment.LIMITE_DE_LINHAS)
+      );
+      const documentSnapshots = await getDocs(firstPage);
+      const lastVisible =
+        documentSnapshots.docs[documentSnapshots.docs.length - 1];
+      const next = query(
+        collection(db, 'conjuntos'),
+        startAfter(lastVisible),
+        limit(8)
+      );
+      const sets = documentSnapshots.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setDocsSets(sets);
+      setIsLoading(false);
+    };
+    paginate();
+  }, []);
 
   return (
     <LayoutBasePage
-      title='Camisolas'
+      title='Conjuntos'
       toolbar={
         <ToolList
           showSearchText
@@ -105,7 +97,7 @@ export const Sets: React.FC = () => {
           justifyContent='center'
           overflow='auto'
         >
-          {totalCount === 0 && !isLoading && (
+          {docsSets.length === 0 && !isLoading && (
             <caption>
               <Typography variant='h4'>{Environment.LISTAGEM_VAZIA}</Typography>
             </caption>
@@ -115,7 +107,7 @@ export const Sets: React.FC = () => {
               <CircularProgress variant='indeterminate' size={200} />
             </Box>
           ) : (
-            cards.map((card) => (
+            docsSets.map((card) => (
               <Card
                 key={card.id}
                 sx={{
@@ -141,7 +133,7 @@ export const Sets: React.FC = () => {
                       component='img'
                       width='auto'
                       height='250'
-                      image={imgs[card.id]}
+                      image={card.img}
                     />
                   </Box>
                   <CardContent
@@ -174,12 +166,12 @@ export const Sets: React.FC = () => {
             ))
           )}
         </Box>
-        {totalCount > 0 &&
-          totalCount > Environment.LIMITE_DE_LINHAS &&
+        {docsSets.length > 0 &&
+          docsSets.length > Environment.LIMITE_DE_LINHAS &&
           !isLoading && (
             <Pagination
               page={page}
-              count={Math.ceil(totalCount / Environment.LIMITE_DE_LINHAS)}
+              count={Math.ceil(docsSets.length / Environment.LIMITE_DE_LINHAS)}
               onChange={(_, newPage) =>
                 setSearchParams(
                   { busca: filterName, pagina: newPage.toString() },
