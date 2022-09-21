@@ -1,7 +1,3 @@
-import { Box } from '@mui/system';
-import { useMemo, useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-
 import {
   Card,
   CardActionArea,
@@ -10,26 +6,22 @@ import {
   Typography,
   Paper,
   CircularProgress,
-  Pagination,
 } from '@mui/material';
+import { Box } from '@mui/system';
+import { UseDebounce } from '../../shared/hooks';
 import { ToolList } from '../../shared/components';
+import { useMemo, useEffect, useState } from 'react';
 import { LayoutBasePage } from '../../shared/layouts';
 import { Environment } from '../../shared/environment';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { db } from '../../shared/services/api/firebase/Firebase';
-import {
-  collection,
-  DocumentData,
-  getDocs,
-  limit,
-  orderBy,
-  query,
-  startAfter,
-  where,
-} from 'firebase/firestore';
+import { collection, DocumentData, getDocs, query } from 'firebase/firestore';
+import { DockSharp } from '@mui/icons-material';
 
 export const Sets: React.FC = () => {
   const navigate = useNavigate();
+  const { debounce } = UseDebounce(1000);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -38,47 +30,16 @@ export const Sets: React.FC = () => {
     return searchParams.get('busca') || '';
   }, [searchParams]);
 
-  const page = useMemo(() => {
-    return Number(searchParams.get('pagina') || '1');
-  }, [searchParams]);
+  interface IAllSets {
+    id: string;
+    [x: string]: any;
+  }
 
-  const [docsSets, setDocsSets] = useState<DocumentData[]>([]);
   const [allDocsSets, setAllDocsSets] = useState<DocumentData[]>([]);
+  const [filterDocs, setFilterDocs] = useState<DocumentData[]>([]);
 
   useEffect(() => {
     setIsLoading(true);
-    const paginate = async () => {
-      const firstPage = query(
-        collection(db, 'Conjuntos'),
-        limit(Environment.LIMITE_DE_LINHAS)
-      );
-      const documentSnapshots = await getDocs(firstPage);
-      const lastVisible =
-        documentSnapshots.docs[documentSnapshots.docs.length - 1];
-      const next = query(
-        collection(db, 'conjuntos'),
-        startAfter(lastVisible),
-        limit(Environment.LIMITE_DE_LINHAS)
-      );
-      const sets = documentSnapshots.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      const test = documentSnapshots.docs.map((doc) => ({
-        ...doc.data(),
-      }));
-      if (filterName.length != 0) {
-        const filter = test.filter((doc) => {
-          return doc.nome.includes(filterName);
-        });
-        setDocsSets([...filter]);
-        console.log('aqui', docsSets);
-        setIsLoading(false);
-      } else {
-        setDocsSets(sets);
-        setIsLoading(false);
-      }
-    };
     const allCollection = async () => {
       const allDocs = query(collection(db, 'Conjuntos'));
       const documentSnapshots = await getDocs(allDocs);
@@ -86,11 +47,23 @@ export const Sets: React.FC = () => {
         ...doc.data(),
         id: doc.id,
       }));
-      setAllDocsSets(allSets);
+      setFilterDocs(allSets);
+      debounce(() => {
+        if (filterName.length != 0) {
+          const filter = filterDocs.filter((doc) => {
+            return doc.nome.includes(filterName);
+          });
+          console.log(filter);
+          setAllDocsSets(filter);
+          setIsLoading(false);
+        } else {
+          setAllDocsSets(allSets);
+          setIsLoading(false);
+        }
+      });
     };
     allCollection();
-    paginate();
-  }, [filterName, page]);
+  }, [filterName]);
 
   return (
     <LayoutBasePage
@@ -100,7 +73,7 @@ export const Sets: React.FC = () => {
           showSearchText
           searchText={filterName}
           changeTextSearch={(texto) =>
-            setSearchParams({ busca: texto, pagina: '1' }, { replace: true })
+            setSearchParams({ busca: texto }, { replace: true })
           }
         />
       }
@@ -125,7 +98,7 @@ export const Sets: React.FC = () => {
           width='100%'
           height='100%'
         >
-          {docsSets.length === 0 && !isLoading && (
+          {allDocsSets.length === 0 && !isLoading && (
             <caption>
               <Typography variant='h4'>{Environment.LISTAGEM_VAZIA}</Typography>
             </caption>
@@ -135,7 +108,7 @@ export const Sets: React.FC = () => {
               <CircularProgress variant='indeterminate' size={200} />
             </Box>
           ) : (
-            docsSets.map((card) => (
+            allDocsSets.map((card) => (
               <Card
                 key={card.id}
                 sx={{
@@ -194,22 +167,6 @@ export const Sets: React.FC = () => {
             ))
           )}
         </Box>
-        {allDocsSets.length > 0 &&
-          allDocsSets.length > Environment.LIMITE_DE_LINHAS &&
-          !isLoading && (
-            <Pagination
-              page={page}
-              count={Math.ceil(
-                allDocsSets.length / Environment.LIMITE_DE_LINHAS
-              )}
-              onChange={(_, newPage) =>
-                setSearchParams(
-                  { busca: filterName, pagina: newPage.toString() },
-                  { replace: true }
-                )
-              }
-            />
-          )}
       </Box>
     </LayoutBasePage>
   );
