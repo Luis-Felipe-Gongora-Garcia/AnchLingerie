@@ -30,8 +30,6 @@ const options = [
   'Tamanho G',
   'Tamanho GG',
   'Tamanho Plus Size',
-  'Do maior R$ pro menor R$',
-  'Do menor R$ pro maior R$',
 ];
 
 export const ToolList: React.FC<IToolList> = ({

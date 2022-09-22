@@ -13,17 +13,17 @@ import { ToolList } from '../../shared/components';
 import { useMemo, useEffect, useState } from 'react';
 import { LayoutBasePage } from '../../shared/layouts';
 import { Environment } from '../../shared/environment';
+import { useFilterContext } from '../../shared/contexts';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { db } from '../../shared/services/api/firebase/Firebase';
 import { collection, DocumentData, getDocs, query } from 'firebase/firestore';
-import { useFilterContext } from '../../shared/contexts';
 
 export const Sets: React.FC = () => {
   const navigate = useNavigate();
   const { debounce } = UseDebounce(1000);
   const [searchParams, setSearchParams] = useSearchParams();
-  const { setFilterSize, filterSize } = useFilterContext();
+  const { filterSize } = useFilterContext();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -33,7 +33,12 @@ export const Sets: React.FC = () => {
 
   const [allDocsSets, setAllDocsSets] = useState<DocumentData[]>([]);
   const [filterDocs, setFilterDocs] = useState<DocumentData[]>([]);
-  const [resetFilterSize, setResetFilterSize] = useState(false);
+
+  function removeItem(arr: DocumentData[], prop: string, value: string) {
+    return arr.filter((i) => {
+      return i[prop] !== value;
+    });
+  }
 
   useEffect(() => {
     setIsLoading(true);
@@ -51,41 +56,75 @@ export const Sets: React.FC = () => {
             return doc.nome.includes(filterName);
           });
           if (filterSize !== 'Filtro') {
-            const filterSizeDocs = filterDocs.filter((doc) => {
-              return doc.tamanhos.includes(filterSize?.slice(-1));
-            });
-            setAllDocsSets(filterSizeDocs);
-            setIsLoading(false);
-            setResetFilterSize(true);
-            console.log(
-              'aqui é o filtro de tamanho com o filtro de busca',
-              filterSizeDocs
-            );
+            if (filterSize === 'Tamanho Plus Size') {
+              const arr = filter.filter((doc) => {
+                return doc.tamanhos.includes(filterSize?.slice(-9));
+              });
+              setAllDocsSets(arr);
+              setIsLoading(false);
+            } else {
+              if (filterSize === 'Tamanho G') {
+                const arr = filter.filter((doc) => {
+                  return doc.tamanhos.includes(filterSize?.slice(-1));
+                });
+                const arr2 = removeItem(arr, 'tamanhos', 'GG');
+                setAllDocsSets(arr2);
+                setIsLoading(false);
+                console.log('aqui', arr2);
+              } else if (filterSize === 'Tamanho GG') {
+                const arr = filter.filter((doc) => {
+                  return doc.tamanhos.includes(filterSize?.slice(-1));
+                });
+                const arr2 = removeItem(arr, 'tamanhos', 'G');
+                setAllDocsSets(arr2);
+                setIsLoading(false);
+                console.log('aqui', arr2);
+              } else {
+                const filterSizeDocs = filter.filter((doc) => {
+                  return doc.tamanhos.includes(filterSize?.slice(-1));
+                });
+                setAllDocsSets(filterSizeDocs);
+                setIsLoading(false);
+              }
+            }
           } else {
             setAllDocsSets(filter);
             setIsLoading(false);
-            setResetFilterSize(true);
-            console.log('aqui é somente o filtro de busca', filter);
+          }
+        } else if (filterSize !== 'Filtro') {
+          if (filterSize === 'Tamanho Plus Size') {
+            const arr = filterDocs.filter((doc) => {
+              return doc.tamanhos.includes(filterSize?.slice(-9));
+            });
+            setAllDocsSets(arr);
+            setIsLoading(false);
+          } else {
+            if (filterSize === 'Tamanho G') {
+              const arr = filterDocs.filter((doc) => {
+                return doc.tamanhos.includes(filterSize?.slice(-1));
+              });
+              const arr2 = removeItem(arr, 'tamanhos', 'GG');
+              setAllDocsSets(arr2);
+              setIsLoading(false);
+            } else if (filterSize === 'Tamanho GG') {
+              const arr = filterDocs.filter((doc) => {
+                return doc.tamanhos.includes(filterSize?.slice(-1));
+              });
+              const arr2 = removeItem(arr, 'tamanhos', 'G');
+              setAllDocsSets(arr2);
+              setIsLoading(false);
+              console.log('aqui', arr2);
+            } else {
+              const filterSizeDocs = filterDocs.filter((doc) => {
+                return doc.tamanhos.includes(filterSize?.slice(-1));
+              });
+              setAllDocsSets(filterSizeDocs);
+              setIsLoading(false);
+            }
           }
         } else {
-          if (filterSize !== 'Filtro') {
-            const filterSizeDocs = filterDocs.filter((doc) => {
-              return doc.tamanhos.includes(filterSize?.slice(-1));
-            });
-            setAllDocsSets(filterSizeDocs);
-            setIsLoading(false);
-            setResetFilterSize(true);
-            console.log(
-              'aqui é o filtro de tamanho sem o filtro de busca',
-              filterSize,
-              filterDocs
-            );
-          } else {
-            setAllDocsSets(allSets);
-            setIsLoading(false);
-            setResetFilterSize(true);
-            console.log('aqui é normal, sem nada');
-          }
+          setAllDocsSets(allSets);
+          setIsLoading(false);
         }
       });
     };
@@ -118,9 +157,7 @@ export const Sets: React.FC = () => {
         component={Paper}
       >
         {allDocsSets.length === 0 && !isLoading && (
-          <caption>
-            <Typography variant='h4'>{Environment.LISTAGEM_VAZIA}</Typography>
-          </caption>
+          <Typography variant='h4'>{Environment.LISTAGEM_VAZIA}</Typography>
         )}
         <Box
           display='flex'
