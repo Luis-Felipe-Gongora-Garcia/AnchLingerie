@@ -1,7 +1,11 @@
 import { BrowserRouter } from 'react-router-dom';
 import { AppRoutes } from './routes';
 import { Banner, SideMenu } from './shared/components';
-import { AppThemeProvider, DrawerProvider } from './shared/contexts';
+import {
+  AppThemeProvider,
+  DrawerProvider,
+  FilterProvider,
+} from './shared/contexts';
 
 export const App = () => {
   return (
@@ -10,7 +14,9 @@ export const App = () => {
         <BrowserRouter>
           <SideMenu>
             <Banner>
-              <AppRoutes />
+              <FilterProvider>
+                <AppRoutes />
+              </FilterProvider>
             </Banner>
           </SideMenu>
         </BrowserRouter>

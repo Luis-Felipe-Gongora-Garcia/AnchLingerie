@@ -10,7 +10,8 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
+import { useFilterContext } from '../../contexts';
 
 import { Environment } from '../../environment';
 
@@ -42,7 +43,11 @@ export const ToolList: React.FC<IToolList> = ({
 }) => {
   const theme = useTheme();
 
+  const { setFilterSize, filterSize } = useFilterContext();
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const [filterOptions, setFilterOptions] = useState(options);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -55,11 +60,16 @@ export const ToolList: React.FC<IToolList> = ({
   const handleMenuItemClick = (_: MouseEvent<HTMLElement>, index: number) => {
     setSelectedIndex(index);
     setAnchorEl(null);
+    setFilterSize(filterOptions[index]);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  useEffect(() => {
+    setFilterSize('Filtro');
+  }, []);
 
   return (
     <Box

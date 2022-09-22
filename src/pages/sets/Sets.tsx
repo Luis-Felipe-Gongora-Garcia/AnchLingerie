@@ -17,12 +17,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { db } from '../../shared/services/api/firebase/Firebase';
 import { collection, DocumentData, getDocs, query } from 'firebase/firestore';
-import { DockSharp } from '@mui/icons-material';
+import { useFilterContext } from '../../shared/contexts';
 
 export const Sets: React.FC = () => {
   const navigate = useNavigate();
   const { debounce } = UseDebounce(1000);
   const [searchParams, setSearchParams] = useSearchParams();
+  const { setFilterSize, filterSize } = useFilterContext();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,13 +31,9 @@ export const Sets: React.FC = () => {
     return searchParams.get('busca') || '';
   }, [searchParams]);
 
-  interface IAllSets {
-    id: string;
-    [x: string]: any;
-  }
-
   const [allDocsSets, setAllDocsSets] = useState<DocumentData[]>([]);
   const [filterDocs, setFilterDocs] = useState<DocumentData[]>([]);
+  const [resetFilterSize, setResetFilterSize] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -49,21 +46,51 @@ export const Sets: React.FC = () => {
       }));
       setFilterDocs(allSets);
       debounce(() => {
-        if (filterName.length != 0) {
+        if (filterName.length !== 0) {
           const filter = filterDocs.filter((doc) => {
             return doc.nome.includes(filterName);
           });
-          console.log(filter);
-          setAllDocsSets(filter);
-          setIsLoading(false);
+          if (filterSize !== 'Filtro') {
+            const filterSizeDocs = filterDocs.filter((doc) => {
+              return doc.tamanhos.includes(filterSize?.slice(-1));
+            });
+            setAllDocsSets(filterSizeDocs);
+            setIsLoading(false);
+            setResetFilterSize(true);
+            console.log(
+              'aqui é o filtro de tamanho com o filtro de busca',
+              filterSizeDocs
+            );
+          } else {
+            setAllDocsSets(filter);
+            setIsLoading(false);
+            setResetFilterSize(true);
+            console.log('aqui é somente o filtro de busca', filter);
+          }
         } else {
-          setAllDocsSets(allSets);
-          setIsLoading(false);
+          if (filterSize !== 'Filtro') {
+            const filterSizeDocs = filterDocs.filter((doc) => {
+              return doc.tamanhos.includes(filterSize?.slice(-1));
+            });
+            setAllDocsSets(filterSizeDocs);
+            setIsLoading(false);
+            setResetFilterSize(true);
+            console.log(
+              'aqui é o filtro de tamanho sem o filtro de busca',
+              filterSize,
+              filterDocs
+            );
+          } else {
+            setAllDocsSets(allSets);
+            setIsLoading(false);
+            setResetFilterSize(true);
+            console.log('aqui é normal, sem nada');
+          }
         }
       });
     };
     allCollection();
-  }, [filterName]);
+  }, [filterName, filterSize]);
 
   return (
     <LayoutBasePage
@@ -75,6 +102,7 @@ export const Sets: React.FC = () => {
           changeTextSearch={(texto) =>
             setSearchParams({ busca: texto }, { replace: true })
           }
+          showFilter
         />
       }
     >
@@ -89,6 +117,11 @@ export const Sets: React.FC = () => {
         margin={1}
         component={Paper}
       >
+        {allDocsSets.length === 0 && !isLoading && (
+          <caption>
+            <Typography variant='h4'>{Environment.LISTAGEM_VAZIA}</Typography>
+          </caption>
+        )}
         <Box
           display='flex'
           flexDirection='row'
@@ -98,11 +131,6 @@ export const Sets: React.FC = () => {
           width='100%'
           height='100%'
         >
-          {allDocsSets.length === 0 && !isLoading && (
-            <caption>
-              <Typography variant='h4'>{Environment.LISTAGEM_VAZIA}</Typography>
-            </caption>
-          )}
           {isLoading ? (
             <Box overflow='hidden'>
               <CircularProgress variant='indeterminate' size={200} />
