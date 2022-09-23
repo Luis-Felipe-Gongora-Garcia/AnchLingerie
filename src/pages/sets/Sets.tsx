@@ -36,7 +36,17 @@ export const Sets: React.FC = () => {
 
   function removeItem(arr: DocumentData[], prop: string, value: string) {
     return arr.filter((i) => {
-      return i[prop] !== value;
+      if (i[prop] === 'P, M, G e GG') {
+        return i[prop];
+      } else if (i[prop] === 'P, G e GG') {
+        return i[prop];
+      } else if (i[prop] === 'M, G e GG') {
+        return i[prop];
+      } else if (i[prop] === 'G e GG') {
+        return i[prop];
+      } else {
+        return i[prop].slice(-2) !== value;
+      }
     });
   }
 
@@ -113,7 +123,6 @@ export const Sets: React.FC = () => {
               const arr2 = removeItem(arr, 'tamanhos', 'G');
               setAllDocsSets(arr2);
               setIsLoading(false);
-              console.log('aqui', arr2);
             } else {
               const filterSizeDocs = filterDocs.filter((doc) => {
                 return doc.tamanhos.includes(filterSize?.slice(-1));

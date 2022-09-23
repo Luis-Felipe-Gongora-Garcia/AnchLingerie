@@ -5,7 +5,7 @@ export const Sweaters: React.FC = () => {
   return (
     <LayoutBasePage
       title='Camisolas'
-      toolbar={<ToolList showFilter showSearchText searchText='teste' />}
+      toolbar={<ToolList showFilter showSearchText />}
     ></LayoutBasePage>
   );
 };

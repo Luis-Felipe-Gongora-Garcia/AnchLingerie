@@ -10,9 +10,6 @@ export const SetsDetails: React.FC = () => {
   const { id = '' } = useParams<'id'>();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  const [descricao, setDescricao] = useState('');
-  const [name, setName] = useState('');
-  const [tamanhos, setTamanhos] = useState('');
   const [docsSets, setDocsSets] = useState<DocumentData>();
 
   useEffect(() => {
